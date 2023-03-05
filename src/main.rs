@@ -2,6 +2,8 @@ mod api;
 mod server;
 mod db;
 mod extractors;
+mod crypto;
+mod models;
 
 use axum::{Router, Extension};
 

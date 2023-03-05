@@ -1,10 +1,12 @@
 use axum::{
     Router,
-    routing::get
+    routing::{ get, post }
 };
 
-use super::routes::index;
+use super::routes::{ login, register };
 
 pub fn configure() -> Router {
-    Router::new().route("/", get(index))
+    Router::new()
+        .route("/login", get(login))
+        .route("/register", post(register))
 }
