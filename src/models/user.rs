@@ -5,20 +5,38 @@ use mongodb::{
     bson::{ Document, doc },
 };
 
+use serde::{ Serialize, Deserialize };
+
 use crate::crypto::hash::Hash;
 
-pub struct User;
+#[derive(Serialize, Deserialize, Debug)]
+pub struct User {
+    pub email: String,
+    pub password: String,
+}
 
 impl User {
     pub async fn create(collection: Collection<Document>, (email, password): (String, String)) -> MongoResult<InsertOneResult> {
-        let (hash, salt) = Hash::generate(password.as_str());
+        let hash = Hash::generate(password);
 
         let result = collection.insert_one(doc!{
             "email": email,
-            "password": hash,
-            "salt": salt
+            "password": hash
         }, None).await?;
 
         Ok(result)
+    }
+
+    pub async fn verify(collection: Collection<Self>, (email, password): (String, String)) -> MongoResult<bool> {
+        
+        /* Find giver user, if not found return after checking password */
+
+        let user = collection.find_one(doc! {
+            "email": email
+        }, None).await?;
+
+        if user.is_none() { return Ok(false); }
+
+        Ok(Hash::verify(password.as_str(), &user.unwrap().password))
     }
 }

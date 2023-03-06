@@ -1,11 +1,14 @@
 use serde::{ Serialize, Deserialize };
 use validator::Validate;
 
+
+/* Password is not validated to prevent leaking information */
+
 #[derive(Serialize, Deserialize, Validate, Debug)]
 pub struct JsonLogin {
     #[validate(email(message = "Email must be valid"))]
-    email: String,
-    password: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Serialize, Deserialize, Validate, Debug)]
