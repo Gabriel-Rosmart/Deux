@@ -1,6 +1,5 @@
-use serde::{ Serialize, Deserialize };
+use serde::{Deserialize, Serialize};
 use validator::Validate;
-
 
 /* Password is not validated to prevent leaking information */
 

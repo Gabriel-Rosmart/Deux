@@ -1,11 +1,10 @@
-use mongodb::{Client, options::ClientOptions, Database, error::Result as MongoResult };
 use dotenv::dotenv;
+use mongodb::{error::Result as MongoResult, options::ClientOptions, Client, Database};
 
 pub struct Mongo;
 
 impl Mongo {
     pub async fn init() -> MongoResult<Database> {
-
         dotenv().ok();
 
         let dbms = std::env::var("DBMS").expect("No DBMS env variable");

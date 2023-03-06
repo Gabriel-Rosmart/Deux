@@ -1,20 +1,18 @@
 mod api;
-mod server;
+mod crypto;
 mod db;
 mod extractors;
-mod crypto;
 mod models;
+mod server;
 
-use axum::{Router, Extension};
+use axum::{Extension, Router};
 
-use server::config::ServerConfig;
-use db::mongo::Mongo;
 use api::auth::config::configure as auth;
+use db::mongo::Mongo;
+use server::config::ServerConfig;
 
 #[tokio::main]
 async fn main() {
-
-
     let db = Mongo::init().await.unwrap();
 
     let routes = Router::new().nest("/auth", auth());
@@ -22,7 +20,7 @@ async fn main() {
     let app = Router::new().nest("/api", routes).layer(Extension(db));
 
     let addr = ServerConfig::init();
-    
+
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await

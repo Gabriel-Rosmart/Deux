@@ -1,9 +1,6 @@
-use axum::{
-    Router,
-    routing::post
-};
+use axum::{routing::post, Router};
 
-use super::routes::{ login, register };
+use super::routes::{login, register};
 
 pub fn configure() -> Router {
     Router::new()

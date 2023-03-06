@@ -1,15 +1,12 @@
 use axum::{
+    extract::Json,
+    http::StatusCode,
+    response::{IntoResponse, Response},
     Extension,
-    extract::Json, 
-    response::{ Response, IntoResponse },
-    http::StatusCode
 };
-use mongodb::{
-    Database,
-    bson::Document
-};
+use mongodb::{bson::Document, Database};
 
-use crate::extractors::auth::{ JsonLogin, JsonRegister };
+use crate::extractors::auth::{JsonLogin, JsonRegister};
 use crate::models::user::User;
 use validator::Validate;
 
@@ -19,22 +16,30 @@ pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<JsonL
     /* Validate given json, return BAD_REQUEST with error if unvalid */
 
     let is_valid = payload.validate();
-    
+
     if let Err(error) = is_valid {
-        return (StatusCode::BAD_REQUEST, Json(error)).into_response()
+        return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
     /* Verify user and password, return INTERNAL_SERVER_ERROR if db communication fails */
 
     let exists = User::verify(collection, (payload.email, payload.password)).await;
 
-    if exists.is_err() { return StatusCode::INTERNAL_SERVER_ERROR.into_response(); }
+    if exists.is_err() {
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
 
-    if exists.unwrap() { StatusCode::OK.into_response() }
-    else { StatusCode::UNAUTHORIZED.into_response() }
+    if exists.unwrap() {
+        StatusCode::OK.into_response()
+    } else {
+        StatusCode::UNAUTHORIZED.into_response()
+    }
 }
 
-pub async fn register(Extension(db): Extension<Database>, Json(payload): Json<JsonRegister>) -> Response {
+pub async fn register(
+    Extension(db): Extension<Database>,
+    Json(payload): Json<JsonRegister>,
+) -> Response {
     let collection = db.collection::<Document>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
@@ -42,7 +47,7 @@ pub async fn register(Extension(db): Extension<Database>, Json(payload): Json<Js
     let is_valid = payload.validate();
 
     if let Err(error) = is_valid {
-        return  (StatusCode::BAD_REQUEST, Json(error)).into_response();
+        return (StatusCode::BAD_REQUEST, Json(error)).into_response();
     }
 
     /* Create the user, return INTERNAL_SERVER_ERROR if db communication fails  */
