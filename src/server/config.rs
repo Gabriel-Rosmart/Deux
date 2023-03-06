@@ -2,9 +2,9 @@ use std::net::SocketAddr;
 use dotenv::dotenv;
 use std::env;
 
-pub struct Server;
+pub struct ServerConfig;
 
-impl Server {
+impl ServerConfig {
     pub fn init() -> SocketAddr {
         dotenv().ok();
 

@@ -7,7 +7,7 @@ mod models;
 
 use axum::{Router, Extension};
 
-use server::server::Server;
+use server::config::ServerConfig;
 use db::mongo::Mongo;
 use api::auth::config::configure as auth;
 
@@ -21,7 +21,7 @@ async fn main() {
 
     let app = Router::new().nest("/api", routes).layer(Extension(db));
 
-    let addr = Server::init();
+    let addr = ServerConfig::init();
     
     axum::Server::bind(&addr)
         .serve(app.into_make_service())

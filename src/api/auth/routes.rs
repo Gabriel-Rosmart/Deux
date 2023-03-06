@@ -31,7 +31,7 @@ pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<JsonL
     if exists.is_err() { return StatusCode::INTERNAL_SERVER_ERROR.into_response(); }
 
     if exists.unwrap() { StatusCode::OK.into_response() }
-    else { StatusCode::FORBIDDEN.into_response() }
+    else { StatusCode::UNAUTHORIZED.into_response() }
 }
 
 pub async fn register(Extension(db): Extension<Database>, Json(payload): Json<JsonRegister>) -> Response {
