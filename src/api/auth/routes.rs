@@ -6,6 +6,8 @@ use axum::{
 };
 use mongodb::{bson::Document, Database};
 
+use crate::crypto::jwt::JWT;
+
 use crate::extractors::auth::{JsonLogin, JsonRegister};
 use crate::models::user::User;
 use validator::Validate;
@@ -29,8 +31,10 @@ pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<JsonL
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
     }
 
+    let cl = JWT::generate();
+
     if exists.unwrap() {
-        StatusCode::OK.into_response()
+        (StatusCode::OK, cl).into_response()
     } else {
         StatusCode::UNAUTHORIZED.into_response()
     }
