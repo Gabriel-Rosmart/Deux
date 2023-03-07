@@ -38,7 +38,7 @@ where
     }
 
     fn call(&mut self, request: Request<Body>) -> Self::Future {
-        println!("{:#?}", request.headers().get("Authorization"));
+        extract_bearer(&request);
         let future = self.inner.call(request);
         Box::pin(async move {
             let response: Response = future.await?;
@@ -46,4 +46,17 @@ where
             Ok(response)
         })
     }
+}
+
+fn extract_bearer(request: &Request<Body>) -> Option<String> {
+    let header = request.headers().get("Authorization");
+
+    if header.is_none() { return None }
+
+    let inner_string = String::from_utf8(header.unwrap().as_bytes().to_owned()).unwrap();
+    let token = inner_string[7..].to_string();
+
+    println!("Header: {inner_string}, Token:{token}");
+
+    Some("".into())
 }
