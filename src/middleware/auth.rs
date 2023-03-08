@@ -1,11 +1,11 @@
 use axum::{
-    response::{Response, IntoResponse},
     body::Body,
     http::{Request, StatusCode},
+    response::{IntoResponse, Response},
 };
 use futures::future::BoxFuture;
-use tower::{Service, Layer};
 use std::task::{Context, Poll};
+use tower::{Layer, Service};
 
 #[derive(Clone)]
 pub struct Auth;
@@ -41,11 +41,9 @@ where
         /* Check that Authorization header is all correct */
         let token = extract_bearer(&request);
         if let Err(error) = token {
-            return Box::pin(async move {
-                Ok((StatusCode::UNAUTHORIZED, error).into_response())
-            });
+            return Box::pin(async move { Ok((StatusCode::UNAUTHORIZED, error).into_response()) });
         }
-        
+
         let future = self.inner.call(request);
         Box::pin(async move {
             let response: Response = future.await?;
@@ -56,10 +54,11 @@ where
 }
 
 fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
-
     /* Check if Authorization header is present */
     let header = request.headers().get("Authorization");
-    if header.is_none() { return Err("No Authorization header present on request") }
+    if header.is_none() {
+        return Err("No Authorization header present on request");
+    }
 
     /* Check if Bearer is prensent on Authorization header */
     let inner_string = String::from_utf8(header.unwrap().as_bytes().to_owned()).unwrap();
@@ -74,7 +73,7 @@ fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
 
 fn has_bearer(header: &str) -> Result<(), &'static str> {
     let bearer = header.get(0..6).map(|value| value.to_string());
-    if bearer.is_none() || bearer.unwrap_or("".to_string()) != "Bearer" { 
+    if bearer.is_none() || bearer.unwrap_or("".to_string()) != "Bearer" {
         return Err("No Bearer present on Authorization header");
     }
     Ok(())

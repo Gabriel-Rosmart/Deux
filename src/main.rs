@@ -2,9 +2,9 @@ mod api;
 mod crypto;
 mod db;
 mod extractors;
+mod middleware;
 mod models;
 mod server;
-mod middleware;
 
 use axum::{Extension, Router};
 
@@ -18,7 +18,10 @@ async fn main() {
 
     let routes = Router::new().nest("/auth", auth());
 
-    let app = Router::new().nest("/api", routes).layer(Extension(db)).layer(middleware::auth::Auth);
+    let app = Router::new()
+        .nest("/api", routes)
+        .layer(Extension(db))
+        .layer(middleware::auth::Auth);
 
     let addr = ServerConfig::init();
 
