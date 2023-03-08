@@ -6,6 +6,8 @@ use axum::{
 use futures::future::BoxFuture;
 use std::task::{Context, Poll};
 use tower::{Layer, Service};
+use regex::Regex;
+use lazy_static::lazy_static;
 
 #[derive(Clone)]
 pub struct Auth;
@@ -62,15 +64,25 @@ fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
 
     /* Check if Bearer is prensent on Authorization header */
     let inner_string = String::from_utf8(header.unwrap().as_bytes().to_owned()).unwrap();
-
+    /*
     has_bearer(&inner_string)?;
-    has_whitespace(&inner_string)?;
+    has_whitespace(&inner_string)?;*/
+
+    if !validate_header(&inner_string) { return Err("Malformed auth header"); }
 
     let token = has_token(&inner_string)?;
 
     Ok(token)
 }
 
+
+fn validate_header(header: &str) -> bool {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"^Bearer [a-zA-z0-9]+").unwrap();
+    }
+    RE.is_match(header)
+}
+/*
 fn has_bearer(header: &str) -> Result<(), &'static str> {
     let bearer = header.get(0..6).map(|value| value.to_string());
     if bearer.is_none() || bearer.unwrap_or("".to_string()) != "Bearer" {
@@ -85,7 +97,7 @@ fn has_whitespace(header: &str) -> Result<(), &'static str> {
     }
     Ok(())
 }
-
+*/
 fn has_token(header: &str) -> Result<String, &'static str> {
     let token = header.get(7..).map(|value| value.to_string());
     if token.is_none() {

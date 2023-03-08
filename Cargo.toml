@@ -18,6 +18,8 @@ sha2 = "0.10.6"
 jwt = "0.16.0"
 tower = "0.4.13"
 futures = "0.3.26"
+regex = "1.7.1"
+lazy_static = "1.4.0"
 
 [dependencies.mongodb]
 version = "2.3.1"
