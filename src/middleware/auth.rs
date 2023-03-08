@@ -1,13 +1,14 @@
 use axum::{
     body::Body,
     http::{Request, StatusCode},
-    response::{IntoResponse, Response},
+    response::{IntoResponse, Response}
 };
 use futures::future::BoxFuture;
 use std::task::{Context, Poll};
 use tower::{Layer, Service};
 use regex::Regex;
 use lazy_static::lazy_static;
+use crate::crypto::jwt::JWT;
 
 #[derive(Clone)]
 pub struct Auth;
@@ -39,17 +40,24 @@ where
         self.inner.poll_ready(cx)
     }
 
-    fn call(&mut self, request: Request<Body>) -> Self::Future {
+    fn call(&mut self, mut request: Request<Body>) -> Self::Future {
         /* Check that Authorization header is all correct */
         let token = extract_bearer(&request);
+
         if let Err(error) = token {
             return Box::pin(async move { Ok((StatusCode::UNAUTHORIZED, error).into_response()) });
         }
 
+        /* Check if token is valid */
+        let current_user = JWT::validate(&token.unwrap());
+        if current_user.is_err() {
+            return Box::pin(async move { Ok((StatusCode::UNAUTHORIZED, "Invalid token").into_response()) });
+        }
+
+        request.extensions_mut().insert(current_user.unwrap());
         let future = self.inner.call(request);
         Box::pin(async move {
             let response: Response = future.await?;
-            //let response = StatusCode::FOUND.into_response();
             Ok(response)
         })
     }
@@ -64,9 +72,6 @@ fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
 
     /* Check if Bearer is prensent on Authorization header */
     let inner_string = String::from_utf8(header.unwrap().as_bytes().to_owned()).unwrap();
-    /*
-    has_bearer(&inner_string)?;
-    has_whitespace(&inner_string)?;*/
 
     if !validate_header(&inner_string) { return Err("Malformed auth header"); }
 
@@ -82,22 +87,7 @@ fn validate_header(header: &str) -> bool {
     }
     RE.is_match(header)
 }
-/*
-fn has_bearer(header: &str) -> Result<(), &'static str> {
-    let bearer = header.get(0..6).map(|value| value.to_string());
-    if bearer.is_none() || bearer.unwrap_or("".to_string()) != "Bearer" {
-        return Err("No Bearer present on Authorization header");
-    }
-    Ok(())
-}
 
-fn has_whitespace(header: &str) -> Result<(), &'static str> {
-    if header.get(6..7).unwrap_or("").to_string() != " " {
-        return Err("Malformed Authorization header");
-    }
-    Ok(())
-}
-*/
 fn has_token(header: &str) -> Result<String, &'static str> {
     let token = header.get(7..).map(|value| value.to_string());
     if token.is_none() {
