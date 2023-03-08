@@ -705,6 +705,7 @@ dependencies = [
  "dotenv",
  "futures 0.3.26",
  "hmac",
+ "hyper",
  "jwt",
  "lazy_static",
  "mongodb",

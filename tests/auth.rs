@@ -6,12 +6,14 @@ mod tests {
         body::Body,
         http::{self, Request, StatusCode}
     };
+    use hyper;
     use serde_json::json;
     use tower::ServiceExt;
     use deux::{
         db::mongo::Mongo,
         api::auth::config::configure as auth,
-        api::user::config::configure as user
+        api::user::config::configure as user,
+        crypto::jwt::JWT
     };
     
     async fn app() -> Router {
@@ -58,5 +60,77 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    }
+
+    #[tokio::test]
+    async fn login_validates_correct_email() {
+        let app = app().await;
+        let uri = "/api/auth/login";
+
+        let bad_email_body = json!(
+            {
+                "email": "notanemail",
+                "password": "12345678"
+            }
+        );
+
+        let response = app
+            .oneshot(Request::post(uri)
+            .header(http::header::CONTENT_TYPE, "application/json")
+            .body(Body::from(bad_email_body.to_string())).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn login_yields_unathorized_for_inexsistent_user() {
+        let app = app().await;
+        let uri = "/api/auth/login";
+
+        let inexistent_user_body = json!(
+            {
+                "email": "doesnotexists@gmail.com",
+                "password": "12345678"
+            }
+        );
+
+        let response = app
+            .oneshot(Request::post(uri)
+            .header(http::header::CONTENT_TYPE, "application/json")
+            .body(Body::from(inexistent_user_body.to_string())).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn login_responds_with_valid_token() {
+        let app = app().await;
+        let uri = "/api/auth/login";
+
+        let body = json!(
+            {
+                "email": "example@gmail.com",
+                "password": "12345678"
+            }
+        );
+
+        let response = app
+            .oneshot(Request::post(uri)
+            .header(http::header::CONTENT_TYPE, "application/json")
+            .body(Body::from(body.to_string())).unwrap())
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let response_body = hyper::body::to_bytes(response.into_body()).await.unwrap();
+        let response_string = String::from_utf8(response_body.to_vec()).unwrap();
+        let valid_token = JWT::validate(&response_string);
+
+        assert_eq!(valid_token.is_ok(), true);
     }
 }
