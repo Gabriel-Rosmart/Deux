@@ -9,6 +9,7 @@ mod server;
 use axum::{Extension, Router};
 
 use api::auth::config::configure as auth;
+use api::user::config::configure as user;
 use db::mongo::Mongo;
 use server::config::ServerConfig;
 
@@ -16,12 +17,11 @@ use server::config::ServerConfig;
 async fn main() {
     let db = Mongo::init().await.unwrap();
 
-    let routes = Router::new().nest("/auth", auth());
+    let routes = Router::new().nest("/auth", auth()).nest("/user", user());
 
     let app = Router::new()
         .nest("/api", routes)
-        .layer(Extension(db))
-        .layer(middleware::auth::Auth);
+        .layer(Extension(db));
 
     let addr = ServerConfig::init();
 
