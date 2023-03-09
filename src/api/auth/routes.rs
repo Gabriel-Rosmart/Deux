@@ -8,11 +8,11 @@ use mongodb::{bson::Document, Database};
 
 use crate::crypto::jwt::JWT;
 
-use crate::extractors::auth::{JsonLogin, JsonRegister};
+use crate::extractors::auth::{LoginRequest, RegisterRequest};
 use crate::models::user::User;
 use validator::Validate;
 
-pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<JsonLogin>) -> Response {
+pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<LoginRequest>) -> Response {
     let collection = db.collection::<User>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
@@ -42,7 +42,7 @@ pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<JsonL
 
 pub async fn register(
     Extension(db): Extension<Database>,
-    Json(payload): Json<JsonRegister>,
+    Json(payload): Json<RegisterRequest>,
 ) -> Response {
     let collection = db.collection::<Document>("users");
 
