@@ -133,4 +133,25 @@ mod tests {
 
         assert_eq!(valid_token.is_ok(), true);
     }
+
+    #[tokio::test]
+    async fn login_redirects_if_already_authenticated() {
+        let app = app().await;
+        let uri = "/api/auth/login";
+
+        /* Note that a body is not neccesary, nor the Content-Type header
+           since an already authenticated user should be redircted
+        */
+
+        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
+
+        let response = app
+            .oneshot(Request::post(uri)
+            .header(http::header::AUTHORIZATION, auth_header)
+            .body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+
+            assert_eq!(response.status(), StatusCode::FOUND);
+    }
 }
