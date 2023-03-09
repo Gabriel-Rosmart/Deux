@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::{
     extract::Json,
     http::StatusCode,
@@ -12,7 +14,7 @@ use crate::extractors::auth::{LoginRequest, RegisterRequest};
 use crate::models::user::User;
 use validator::Validate;
 
-pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<LoginRequest>) -> Response {
+pub async fn login(Extension(db): Extension<Arc<Database>>, Json(payload): Json<LoginRequest>) -> Response {
     let collection = db.collection::<User>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
@@ -41,7 +43,7 @@ pub async fn login(Extension(db): Extension<Database>, Json(payload): Json<Login
 }
 
 pub async fn register(
-    Extension(db): Extension<Database>,
+    Extension(db): Extension<Arc<Database>>,
     Json(payload): Json<RegisterRequest>,
 ) -> Response {
     let collection = db.collection::<Document>("users");

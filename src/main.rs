@@ -6,6 +6,8 @@ mod middleware;
 mod models;
 mod server;
 
+use std::sync::Arc;
+
 use axum::{Extension, Router};
 
 use api::auth::config::configure as auth;
@@ -17,11 +19,13 @@ use server::config::ServerConfig;
 async fn main() {
     let db = Mongo::init().await.unwrap();
 
+    let state = Arc::new(db);
+
     let routes = Router::new().nest("/auth", auth()).nest("/user", user());
 
     let app = Router::new()
         .nest("/api", routes)
-        .layer(Extension(db));
+        .layer(Extension(state));
 
     let addr = ServerConfig::init();
 

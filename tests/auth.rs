@@ -139,8 +139,9 @@ mod tests {
         let app = app().await;
         let uri = "/api/auth/login";
 
-        /* Note that a body is not neccesary, nor the Content-Type header
-           since an already authenticated user should be redircted
+        /* 
+            Note that a body is not neccesary, nor the Content-Type header
+            since an already authenticated user should be redirected
         */
 
         let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
