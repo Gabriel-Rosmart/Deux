@@ -1,26 +1,23 @@
 #[cfg(test)]
 mod tests {
     use axum::{
-        Router,
-        Extension,
         body::Body,
-        http::{self, Request, StatusCode}
+        http::{self, Request, StatusCode},
+        Extension, Router,
+    };
+    use deux::{
+        api::auth::config::configure as auth, api::user::config::configure as user,
+        crypto::jwt::JWT, db::mongo::Mongo,
     };
     use hyper;
     use serde_json::json;
     use tower::ServiceExt;
-    use deux::{
-        db::mongo::Mongo,
-        api::auth::config::configure as auth,
-        api::user::config::configure as user,
-        crypto::jwt::JWT
-    };
-    
+
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
-    
+
         let routes = Router::new().nest("/auth", auth()).nest("/user", user());
-    
+
         Router::new().nest("/api", routes).layer(Extension(db))
     }
 
@@ -30,9 +27,12 @@ mod tests {
         let uri = "/api/auth/login";
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::CONTENT_TYPE, "application/json")
-            .body(Body::empty()).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -53,9 +53,12 @@ mod tests {
         );
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::CONTENT_TYPE, "application/json")
-            .body(Body::from(malformed_body.to_string())).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(malformed_body.to_string()))
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -75,9 +78,12 @@ mod tests {
         );
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::CONTENT_TYPE, "application/json")
-            .body(Body::from(bad_email_body.to_string())).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(bad_email_body.to_string()))
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -97,9 +103,12 @@ mod tests {
         );
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::CONTENT_TYPE, "application/json")
-            .body(Body::from(inexistent_user_body.to_string())).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(inexistent_user_body.to_string()))
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -119,9 +128,12 @@ mod tests {
         );
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::CONTENT_TYPE, "application/json")
-            .body(Body::from(body.to_string())).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(body.to_string()))
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
@@ -139,7 +151,7 @@ mod tests {
         let app = app().await;
         let uri = "/api/auth/login";
 
-        /* 
+        /*
             Note that a body is not neccesary, nor the Content-Type header
             since an already authenticated user should be redirected
         */
@@ -147,12 +159,15 @@ mod tests {
         let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
 
         let response = app
-            .oneshot(Request::post(uri)
-            .header(http::header::AUTHORIZATION, auth_header)
-            .body(Body::empty()).unwrap())
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::AUTHORIZATION, auth_header)
+                    .body(Body::empty())
+                    .unwrap(),
+            )
             .await
             .unwrap();
 
-            assert_eq!(response.status(), StatusCode::FOUND);
+        assert_eq!(response.status(), StatusCode::FOUND);
     }
 }

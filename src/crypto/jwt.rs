@@ -1,5 +1,5 @@
 use hmac::{Hmac, Mac};
-use jwt::{ SignWithKey, VerifyWithKey };
+use jwt::{SignWithKey, VerifyWithKey};
 use sha2::Sha256;
 
 use serde::{Deserialize, Serialize};
@@ -22,11 +22,11 @@ impl JWT {
         token_str
     }
 
-    pub fn validate(token: &str) -> Result<Claims, jwt::error::Error>{
+    pub fn validate(token: &str) -> Result<Claims, jwt::error::Error> {
         let jwt_secret = std::env::var("JWT_SECRET").expect("No JWT_SECRET provided in env file");
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
 
-        /* For some reason, if you don't store it in a variable, 
+        /* For some reason, if you don't store it in a variable,
         the program gives an error
         */
         let claims: Claims = token.verify_with_key(&key)?;

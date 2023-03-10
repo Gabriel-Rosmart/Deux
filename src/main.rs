@@ -1,14 +1,16 @@
 mod api;
 mod crypto;
 mod db;
+mod errors;
 mod extractors;
 mod middleware;
 mod models;
 mod server;
-mod errors;
 
 use std::sync::Arc;
 
+use axum::error_handling::HandleErrorLayer;
+use axum::response::Response;
 use axum::{Extension, Router};
 
 use api::auth::config::configure as auth;
@@ -24,8 +26,7 @@ async fn main() {
 
     let routes = Router::new().nest("/auth", auth()).nest("/user", user());
 
-    let app = Router::new()
-        .nest("/api", routes)
+    let app = Router::new().nest("/api", routes)
         .layer(Extension(state));
 
     let addr = ServerConfig::init();

@@ -1,6 +1,6 @@
-use axum::{routing::post, Router};
-use crate::middleware::redirect::Redirect;
 use super::routes::{login, register};
+use crate::middleware::redirect::Redirect;
+use axum::{routing::post, Router};
 
 pub fn configure() -> Router {
     Router::new()
