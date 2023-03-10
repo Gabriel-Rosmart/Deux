@@ -35,7 +35,7 @@ mod tests {
             )
             .await
             .unwrap();
-
+        
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
     }
 

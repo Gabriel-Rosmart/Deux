@@ -9,8 +9,6 @@ mod server;
 
 use std::sync::Arc;
 
-use axum::error_handling::HandleErrorLayer;
-use axum::response::Response;
 use axum::{Extension, Router};
 
 use api::auth::config::configure as auth;
