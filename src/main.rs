@@ -5,6 +5,7 @@ mod extractors;
 mod middleware;
 mod models;
 mod server;
+mod errors;
 
 use std::sync::Arc;
 

@@ -14,31 +14,33 @@ use crate::extractors::auth::{LoginRequest, RegisterRequest};
 use crate::models::user::User;
 use validator::Validate;
 
-pub async fn login(Extension(db): Extension<Arc<Database>>, Json(payload): Json<LoginRequest>) -> Response {
+use crate::errors::server::AppError;
+
+pub async fn login(Extension(db): Extension<Arc<Database>>, Json(payload): Json<LoginRequest>) -> Result<Response, AppError> {
     let collection = db.collection::<User>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
 
-    let is_valid = payload.validate();
-
+    payload.validate()?;
+    /*
     if let Err(error) = is_valid {
         return (StatusCode::BAD_REQUEST, Json(error)).into_response();
-    }
+    }*/
 
     /* Verify user and password, return INTERNAL_SERVER_ERROR if db communication fails */
 
-    let exists = User::verify(collection, (payload.email, payload.password)).await;
-
+    let exists = User::verify(collection, (payload.email, payload.password)).await?;
+    /*
     if exists.is_err() {
         return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-    }
+    }*/
 
     let cl = JWT::generate();
 
-    if exists.unwrap() {
-        (StatusCode::OK, cl).into_response()
+    if exists {
+        Ok((StatusCode::OK, cl).into_response())
     } else {
-        StatusCode::UNAUTHORIZED.into_response()
+        Ok(StatusCode::UNAUTHORIZED.into_response())
     }
 }
 

@@ -21,6 +21,7 @@ futures = "0.3.26"
 regex = "1.7.1"
 lazy_static = "1.4.0"
 hyper = "0.14.24"
+anyhow = "1.0.69"
 
 [dependencies.mongodb]
 version = "2.3.1"
