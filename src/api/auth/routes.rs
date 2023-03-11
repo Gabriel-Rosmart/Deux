@@ -28,7 +28,7 @@ pub async fn login(
 
     /* Verify user and password, return INTERNAL_SERVER_ERROR if db communication fails */
 
-    let exists = User::verify(collection, (payload.email, payload.password)).await?;
+    let exists = User::verify(&collection, (&payload.email, &payload.password)).await?;
 
     let cl = JWT::generate();
 
@@ -49,9 +49,15 @@ pub async fn register(
 
     payload.validate()?;
 
+    /* Check if user already exists */
+    
+    let exists = User::exists(&collection, &payload.email).await?;
+
+    if exists { return Ok((StatusCode::CONFLICT, "user already exists").into_response()); }
+
     /* Create the user, return INTERNAL_SERVER_ERROR if db communication fails  */
 
-    User::create(collection, (payload.email, payload.password)).await?;
+    User::create(&collection, (&payload.email, &payload.password)).await?;
 
     Ok(StatusCode::OK.into_response())
 }

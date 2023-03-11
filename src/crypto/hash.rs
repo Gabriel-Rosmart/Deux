@@ -12,8 +12,8 @@ impl Iterations {
 pub struct Hash;
 
 impl Hash {
-    /* Consume the provided password preventing further usage after calling function */
-    pub fn generate(password: String, iterations: u32) -> String {
+    
+    pub fn generate(password: &str, iterations: u32) -> String {
         let key = std::env::var("HASHER_SECRET_KEY").expect("No HASHER_SECRET_KEY env variable");
 
         let mut hasher = Hasher::default();

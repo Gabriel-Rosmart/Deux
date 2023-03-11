@@ -17,8 +17,8 @@ pub struct User {
 
 impl User {
     pub async fn create(
-        collection: Collection<Document>,
-        (email, password): (String, String),
+        collection: &Collection<Document>,
+        (email, password): (&str, &str),
     ) -> MongoResult<InsertOneResult> {
         let hash = Hash::generate(password, Iterations::MEDIUM);
 
@@ -36,8 +36,8 @@ impl User {
     }
 
     pub async fn verify(
-        collection: Collection<Self>,
-        (email, password): (String, String),
+        collection: &Collection<Self>,
+        (email, password): (&str, &str),
     ) -> MongoResult<bool> {
         /* Find giver user, if not found return after checking password */
 
@@ -54,6 +54,14 @@ impl User {
             return Ok(false);
         }
 
-        Ok(Hash::verify(password.as_str(), &user.unwrap().password))
+        Ok(Hash::verify(password, &user.unwrap().password))
+    }
+
+    pub async fn exists(collection: &Collection<Document>, email: &str) -> MongoResult<bool> {
+        let user = collection.find_one(doc! {
+            "email": email
+        }, None).await?;
+
+        Ok(user.is_some())
     }
 }
