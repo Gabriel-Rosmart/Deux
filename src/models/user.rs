@@ -7,7 +7,7 @@ use mongodb::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::crypto::hash::Hash;
+use crate::crypto::hash::{ Hash, Iterations };
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
@@ -20,7 +20,7 @@ impl User {
         collection: Collection<Document>,
         (email, password): (String, String),
     ) -> MongoResult<InsertOneResult> {
-        let hash = Hash::generate(password);
+        let hash = Hash::generate(password, Iterations::MEDIUM);
 
         let result = collection
             .insert_one(
