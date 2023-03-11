@@ -9,16 +9,17 @@ mod tests {
         api::auth::config::configure as auth, api::user::config::configure as user,
         crypto::jwt::JWT, db::mongo::Mongo,
     };
+    use std::sync::Arc;
     use hyper;
     use serde_json::json;
     use tower::ServiceExt;
 
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
-
+        let state = Arc::new(db);
         let routes = Router::new().nest("/auth", auth()).nest("/user", user());
 
-        Router::new().nest("/api", routes).layer(Extension(db))
+        Router::new().nest("/api", routes).layer(Extension(state))
     }
 
     #[tokio::test]
