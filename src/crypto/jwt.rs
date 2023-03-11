@@ -9,13 +9,22 @@ pub struct Claims {
     email: String,
 }
 
+impl Claims {
+    pub fn new(email: &str) -> Self {
+        Self {
+            email: email.to_string()
+        }
+    }
+}
+
 pub struct JWT;
 
 impl JWT {
-    pub fn generate() -> String {
+    pub fn generate(claims: Claims) -> String {
+        /*
         let claims = Claims {
             email: "test@gmail.com".to_string(),
-        };
+        };*/
         let jwt_secret = std::env::var("JWT_SECRET").expect("No JWT_SECRET provided in env file");
         let key: Hmac<Sha256> = Hmac::new_from_slice(jwt_secret.as_bytes()).unwrap();
         let token_str = claims.sign_with_key(&key).unwrap();

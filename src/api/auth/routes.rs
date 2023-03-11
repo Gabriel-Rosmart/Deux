@@ -7,7 +7,7 @@ use axum::{
 };
 use mongodb::{bson::Document, Database};
 
-use crate::crypto::jwt::JWT;
+use crate::crypto::jwt::{JWT, Claims};
 
 use crate::extractors::auth::{LoginRequest, RegisterRequest};
 use crate::models::user::User;
@@ -30,7 +30,9 @@ pub async fn login(
 
     let exists = User::verify(&collection, (&payload.email, &payload.password)).await?;
 
-    let cl = JWT::generate();
+    let claims = Claims::new(&payload.email);
+
+    let cl = JWT::generate(claims);
 
     if exists {
         Ok((StatusCode::OK, cl).into_response())
