@@ -22,6 +22,8 @@ mod tests {
         app
     }
 
+    /*** Login Tests ***/
+
     #[tokio::test]
     async fn login_does_not_accept_empty_body() {
         let app = app().await;
@@ -151,6 +153,83 @@ mod tests {
     async fn login_redirects_if_already_authenticated() {
         let app = app().await;
         let uri = "/api/auth/login";
+
+        /*
+            Note that a body is not neccesary, nor the Content-Type header
+            since an already authenticated user should be redirected
+        */
+
+        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
+
+        let response = app
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::AUTHORIZATION, auth_header)
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::FOUND);
+    }
+
+    /*** Register Tests ***/
+
+    #[tokio::test]
+    async fn register_checks_if_user_already_exists() {
+        let app = app().await;
+        let uri = "/api/auth/register";
+
+        let body = json!(
+            {
+                "email": "example@gmail.com",
+                "password": "12345678"
+            }
+        );
+
+        let response = app
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(body.to_string()))
+                    .unwrap()
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(response.status(), StatusCode::CONFLICT);
+    }
+    /*
+    #[tokio::test]
+    async fn register_user_correctly() {
+        let app = app().await;
+        let uri = "/api/auth/register";
+
+        let body = json!(
+            {
+                "email": "doesnotexists@gmail.com",
+                "password": "12345678"
+            }
+        );
+
+        let response = app
+            .oneshot(
+                Request::post(uri)
+                    .header(http::header::CONTENT_TYPE, "application/json")
+                    .body(Body::from(body.to_string()))
+                    .unwrap()
+            )
+            .await
+            .unwrap();
+
+            assert_eq!(response.status(), StatusCode::CONFLICT);
+    }*/
+
+    #[tokio::test]
+    async fn register_redirects_if_already_authenticated() {
+        let app = app().await;
+        let uri = "/api/auth/register";
 
         /*
             Note that a body is not neccesary, nor the Content-Type header
