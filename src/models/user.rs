@@ -1,7 +1,7 @@
 use mongodb::{
     bson::{doc, Document},
     error::Result as MongoResult,
-    results::InsertOneResult,
+    results::{InsertOneResult, DeleteResult},
     Collection,
 };
 
@@ -32,6 +32,13 @@ impl User {
             )
             .await?;
 
+        Ok(result)
+    }
+
+    pub async fn delete(collection: &Collection<Document>, email: &str) -> MongoResult<DeleteResult> {
+        let result = collection.delete_one(doc! {
+            "email": email
+        }, None).await?;
         Ok(result)
     }
 
