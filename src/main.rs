@@ -9,8 +9,7 @@ mod server;
 
 use std::sync::Arc;
 
-use axum::{Extension, Router};
-
+use axum::Router;
 use api::auth::config::configure as auth;
 use api::user::config::configure as user;
 use db::mongo::Mongo;
@@ -23,9 +22,8 @@ async fn main() {
     let state = Arc::new(db);
 
     let routes = Router::new().nest("/auth", auth()).nest("/user", user());
-
-    let app = Router::new().nest("/api", routes)
-        .layer(Extension(state));
+    
+    let app: Router<()> = Router::new().nest("/api", routes).with_state(state);
 
     let addr = ServerConfig::init();
 

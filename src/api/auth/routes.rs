@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::Json,
+    extract::{Json, State},
     http::StatusCode,
-    response::{IntoResponse, Response},
-    Extension,
+    response::{IntoResponse, Response}
 };
 use mongodb::{bson::Document, Database};
 
@@ -17,7 +16,7 @@ use validator::Validate;
 use crate::errors::server::AppError;
 
 pub async fn login(
-    Extension(db): Extension<Arc<Database>>,
+    State(db): State<Arc<Database>>,
     Json(payload): Json<LoginRequest>,
 ) -> Result<Response, AppError> {
     
@@ -41,7 +40,7 @@ pub async fn login(
 }
 
 pub async fn register(
-    Extension(db): Extension<Arc<Database>>,
+    State(db): State<Arc<Database>>,
     Json(payload): Json<RegisterRequest>,
 ) -> Result<Response, AppError> {
     let collection = db.collection::<Document>("users");

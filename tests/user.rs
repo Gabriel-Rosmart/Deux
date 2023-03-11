@@ -3,21 +3,26 @@ mod tests {
     use axum::{
         body::Body,
         http::{self, Request, StatusCode},
-        Extension, Router,
+        Router,
     };
     use deux::{
         api::auth::config::configure as auth, api::user::config::configure as user,
         db::mongo::Mongo,
     };
-
+    use std::sync::Arc;
     use tower::ServiceExt;
 
     async fn app() -> Router {
+
         let db = Mongo::init().await.unwrap();
 
-        let routes = Router::new().nest("/auth", auth()).nest("/user", user());
+        let state = Arc::new(db);
 
-        Router::new().nest("/api", routes).layer(Extension(db))
+        let routes = Router::new().nest("/auth", auth()).nest("/user", user());
+    
+        let app: Router<()> = Router::new().nest("/api", routes).with_state(state);
+
+        app
     }
 
     #[tokio::test]

@@ -3,7 +3,7 @@ mod tests {
     use axum::{
         body::Body,
         http::{self, Request, StatusCode},
-        Extension, Router,
+        Router,
     };
     use deux::{
         api::auth::config::configure as auth, api::user::config::configure as user,
@@ -18,8 +18,8 @@ mod tests {
         let db = Mongo::init().await.unwrap();
         let state = Arc::new(db);
         let routes = Router::new().nest("/auth", auth()).nest("/user", user());
-
-        Router::new().nest("/api", routes).layer(Extension(state))
+        let app: Router<()> = Router::new().nest("/api", routes).with_state(state);
+        app
     }
 
     #[tokio::test]
