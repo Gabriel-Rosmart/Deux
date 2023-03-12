@@ -257,7 +257,7 @@ mod tests {
         assert!(valid_token.is_ok());
         
         let delete_request = Request::delete(delete_profile_uri)
-            .header(http::header::AUTHORIZATION, response_string)
+            .header(http::header::AUTHORIZATION, format!("Bearer {response_string}"))
             .body(Body::empty())
             .unwrap();
 
