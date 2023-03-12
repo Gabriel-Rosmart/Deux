@@ -1,10 +1,13 @@
 use axum::{extract::Json, http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
+#[derive(Debug)]
 pub enum AppError {
     InternalServerError,
     BadRequest(Json<ValidationErrors>),
 }
+
+/*** Implementations for coverting error allowing us to use the ? operator ***/
 
 impl From<ValidationErrors> for AppError {
     fn from(value: ValidationErrors) -> Self {
@@ -18,8 +21,14 @@ impl From<mongodb::error::Error> for AppError {
     }
 }
 
-impl From<mongodb::results::InsertOneResult> for AppError {
-    fn from(_: mongodb::results::InsertOneResult) -> Self {
+impl From<jwt::Error> for AppError {
+    fn from(_: jwt::Error) -> Self {
+        Self::InternalServerError
+    }
+}
+
+impl From<hmac::digest::InvalidLength> for AppError {
+    fn from(_: hmac::digest::InvalidLength) -> Self {
         Self::InternalServerError
     }
 }

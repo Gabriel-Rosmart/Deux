@@ -31,7 +31,7 @@ pub async fn login(
 
     let claims = Claims::new(&payload.email);
 
-    let cl = JWT::generate(claims);
+    let cl = JWT::generate(claims)?;
 
     if exists {
         Ok((StatusCode::OK, cl).into_response())

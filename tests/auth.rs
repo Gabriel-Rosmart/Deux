@@ -149,7 +149,7 @@ mod tests {
         let response_string = String::from_utf8(response_body.to_vec()).unwrap();
         let valid_token = JWT::validate(&response_string);
 
-        assert_eq!(valid_token.is_ok(), true);
+        assert!(valid_token.is_ok());
     }
 
     #[tokio::test]
