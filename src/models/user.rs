@@ -1,13 +1,13 @@
 use mongodb::{
     bson::{doc, Document},
     error::Result as MongoResult,
-    results::{InsertOneResult, DeleteResult},
+    results::{DeleteResult, InsertOneResult},
     Collection,
 };
 
 use serde::{Deserialize, Serialize};
 
-use crate::crypto::hash::{ Hash, Iterations };
+use crate::crypto::hash::{Hash, Iterations};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
@@ -35,10 +35,18 @@ impl User {
         Ok(result)
     }
 
-    pub async fn delete(collection: &Collection<Document>, email: &str) -> MongoResult<DeleteResult> {
-        let result = collection.delete_one(doc! {
-            "email": email
-        }, None).await?;
+    pub async fn delete(
+        collection: &Collection<Document>,
+        email: &str,
+    ) -> MongoResult<DeleteResult> {
+        let result = collection
+            .delete_one(
+                doc! {
+                    "email": email
+                },
+                None,
+            )
+            .await?;
         Ok(result)
     }
 
@@ -65,9 +73,14 @@ impl User {
     }
 
     pub async fn exists(collection: &Collection<Document>, email: &str) -> MongoResult<bool> {
-        let user = collection.find_one(doc! {
-            "email": email
-        }, None).await?;
+        let user = collection
+            .find_one(
+                doc! {
+                    "email": email
+                },
+                None,
+            )
+            .await?;
 
         Ok(user.is_some())
     }

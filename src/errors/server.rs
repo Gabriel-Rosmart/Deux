@@ -1,8 +1,4 @@
-use axum::{
-    extract::Json, 
-    response::IntoResponse,
-    http::StatusCode
-};
+use axum::{extract::Json, http::StatusCode, response::IntoResponse};
 use validator::ValidationErrors;
 
 pub enum AppError {

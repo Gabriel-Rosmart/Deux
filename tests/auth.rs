@@ -6,15 +6,13 @@ mod tests {
         Router,
     };
     use deux::{
-        api::auth::config::configure as auth,
-        api::user::config::configure as user,
-        api::profile::config::configure as profile,
-        crypto::jwt::JWT, db::mongo::Mongo,
+        api::auth::config::configure as auth, api::profile::config::configure as profile,
+        api::user::config::configure as user, crypto::jwt::JWT, db::mongo::Mongo,
     };
-    use std::sync::Arc;
     use hyper;
     use serde_json::json;
-    use tower::{ServiceExt, Service};
+    use std::sync::Arc;
+    use tower::{Service, ServiceExt};
 
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
@@ -43,7 +41,7 @@ mod tests {
             )
             .await
             .unwrap();
-        
+
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
     }
 
@@ -198,14 +196,14 @@ mod tests {
                 Request::post(uri)
                     .header(http::header::CONTENT_TYPE, "application/json")
                     .body(Body::from(body.to_string()))
-                    .unwrap()
+                    .unwrap(),
             )
             .await
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::CONFLICT);
     }
-    
+
     #[tokio::test]
     async fn register_user_correctly() {
         let mut app = app().await;
@@ -244,7 +242,7 @@ mod tests {
             .header(http::header::CONTENT_TYPE, "application/json")
             .body(Body::from(body.to_string()))
             .unwrap();
-        
+
         let login_response = app
             .ready()
             .await
@@ -255,14 +253,21 @@ mod tests {
 
         assert_eq!(login_response.status(), StatusCode::OK);
 
-        let response_body = hyper::body::to_bytes(login_response.into_body()).await.unwrap();
+        let response_body = hyper::body::to_bytes(login_response.into_body())
+            .await
+            .unwrap();
         let response_string = String::from_utf8(response_body.to_vec()).unwrap();
         let valid_token = JWT::validate(&response_string);
 
         assert!(valid_token.is_ok());
-        
+
+        /* Delete the user to wrap around and prevent future failures */
+
         let delete_request = Request::delete(delete_profile_uri)
-            .header(http::header::AUTHORIZATION, format!("Bearer {response_string}"))
+            .header(
+                http::header::AUTHORIZATION,
+                format!("Bearer {response_string}"),
+            )
             .body(Body::empty())
             .unwrap();
 

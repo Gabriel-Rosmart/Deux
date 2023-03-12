@@ -9,10 +9,10 @@ mod server;
 
 use std::sync::Arc;
 
-use axum::Router;
 use api::auth::config::configure as auth;
-use api::user::config::configure as user;
 use api::profile::config::configure as profile;
+use api::user::config::configure as user;
+use axum::Router;
 use db::mongo::Mongo;
 use server::config::ServerConfig;
 
@@ -26,7 +26,7 @@ async fn main() {
         .nest("/auth", auth())
         .nest("/user", user())
         .nest("/profile", profile());
-    
+
     let app: Router<()> = Router::new().nest("/api", routes).with_state(state);
 
     let addr = ServerConfig::init();

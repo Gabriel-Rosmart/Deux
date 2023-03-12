@@ -12,7 +12,7 @@ pub struct Claims {
 impl Claims {
     pub fn new(email: &str) -> Self {
         Self {
-            email: email.to_string()
+            email: email.to_string(),
         }
     }
 
