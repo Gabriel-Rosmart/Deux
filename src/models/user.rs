@@ -1,7 +1,7 @@
 use mongodb::{
     bson::{doc, Document},
     error::Result as MongoResult,
-    results::{DeleteResult, InsertOneResult},
+    results::{DeleteResult, InsertOneResult, UpdateResult},
     Collection,
 };
 
@@ -31,6 +31,26 @@ impl User {
                 None,
             )
             .await?;
+
+        Ok(result)
+    }
+
+    pub async fn update(
+        collection: &Collection<Document>,
+        email: &str,
+        password: &str,
+    ) -> MongoResult<UpdateResult> {
+
+        let hash = Hash::generate(password, Iterations::MEDIUM);
+
+        let result = collection
+            .update_one(doc! {
+                "email": email
+            }, doc! {
+                "$set": {
+                    "password": hash
+                }
+            }, None).await?;
 
         Ok(result)
     }
