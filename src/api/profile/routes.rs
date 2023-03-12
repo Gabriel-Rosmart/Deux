@@ -1,6 +1,7 @@
 use crate::{crypto::jwt::Claims, extractors::profile::UpdateProfileRequest};
 use crate::errors::server::AppError;
 use crate::models::user::User;
+use crate::constants::messages::DatabaseMessages;
 use axum::{
     extract::State,
     http::StatusCode,
@@ -18,7 +19,7 @@ pub async fn update(
     let collection = db.collection::<Document>("users");
     let result = User::update(&collection, &current_user.email(), &payload.password).await?;
     if result.modified_count == 0 {
-        return Ok((StatusCode::NOT_FOUND, "user does not exists").into_response());
+        return Ok((StatusCode::NOT_FOUND, DatabaseMessages::NOT_EXISTS).into_response());
     }
     Ok(StatusCode::OK.into_response())
 }
@@ -31,7 +32,7 @@ pub async fn delete(
     let collection = db.collection::<Document>("users");
     let result = User::delete(&collection, &current_user.email()).await?;
     if result.deleted_count == 0 {
-        return Ok((StatusCode::NOT_FOUND, "user does not exists").into_response());
+        return Ok((StatusCode::NOT_FOUND, DatabaseMessages::NOT_EXISTS).into_response());
     }
     Ok(StatusCode::OK.into_response())
 }

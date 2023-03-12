@@ -8,6 +8,7 @@ use axum::{
 use mongodb::{bson::Document, Database};
 
 use crate::crypto::jwt::{Claims, JWT};
+use crate::constants::messages::DatabaseMessages;
 
 use crate::extractors::auth::{LoginRequest, RegisterRequest};
 use crate::models::user::User;
@@ -55,7 +56,7 @@ pub async fn register(
     let exists = User::exists(&collection, &payload.email).await?;
 
     if exists {
-        return Ok((StatusCode::CONFLICT, "user already exists").into_response());
+        return Ok((StatusCode::CONFLICT, DatabaseMessages::ALREADY_EXISTS).into_response());
     }
 
     /* Create the user, return INTERNAL_SERVER_ERROR if db communication fails  */

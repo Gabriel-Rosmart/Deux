@@ -1,19 +1,20 @@
 use axum::{body::Body, http::Request};
 use lazy_static::lazy_static;
 use regex::Regex;
+use crate::constants::messages::BearerValidationMessages;
 
 pub fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
     /* Check if Authorization header is present */
     let header = request.headers().get("Authorization");
     if header.is_none() {
-        return Err("No Authorization header present on request");
+        return Err(BearerValidationMessages::MISSING_HEADER);
     }
 
     /* Check if Bearer is prensent on Authorization header */
     let inner_string = String::from_utf8(header.unwrap().as_bytes().to_owned()).unwrap();
 
     if !validate_header(&inner_string) {
-        return Err("Malformed auth header");
+        return Err(BearerValidationMessages::MALFORMED_HEADER);
     }
 
     let token = has_token(&inner_string)?;
@@ -31,7 +32,7 @@ fn validate_header(header: &str) -> bool {
 fn has_token(header: &str) -> Result<String, &'static str> {
     let token = header.get(7..).map(|value| value.to_string());
     if token.is_none() {
-        return Err("No Bearer present on Authorization header");
+        return Err(BearerValidationMessages::MISSING_BEARER);
     }
     Ok(token.unwrap())
 }

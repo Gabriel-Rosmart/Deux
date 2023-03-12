@@ -1,5 +1,6 @@
 use super::helpers::bearer::extract_bearer;
 use crate::crypto::jwt::JWT;
+use crate::constants::messages::TokenMessages;
 use axum::{
     body::Body,
     http::{Request, StatusCode},
@@ -55,7 +56,7 @@ where
 
             if current_user.is_err() {
                 return Box::pin(async move {
-                    Ok((StatusCode::UNAUTHORIZED, "Invalid token").into_response())
+                    Ok((StatusCode::UNAUTHORIZED, TokenMessages::INVALID).into_response())
                 });
             }
 
