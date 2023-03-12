@@ -12,7 +12,7 @@ mod tests {
     use std::sync::Arc;
     use hyper;
     use serde_json::json;
-    use tower::ServiceExt;
+    use tower::{ServiceExt, Service};
 
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
@@ -198,13 +198,16 @@ mod tests {
             .await
             .unwrap();
 
-            assert_eq!(response.status(), StatusCode::CONFLICT);
+        assert_eq!(response.status(), StatusCode::CONFLICT);
     }
-    /*
+    
     #[tokio::test]
     async fn register_user_correctly() {
-        let app = app().await;
-        let uri = "/api/auth/register";
+        let mut app = app().await;
+
+        let register_uri = "/api/auth/register";
+        let login_uri = "/api/auth/login";
+        let delete_profile_uri = "/api/profile/delete";
 
         let body = json!(
             {
@@ -213,18 +216,61 @@ mod tests {
             }
         );
 
-        let response = app
-            .oneshot(
-                Request::post(uri)
-                    .header(http::header::CONTENT_TYPE, "application/json")
-                    .body(Body::from(body.to_string()))
-                    .unwrap()
-            )
+        /* Register user and check if all came up correctly */
+
+        let register_request = Request::post(register_uri)
+            .header(http::header::CONTENT_TYPE, "application/json")
+            .body(Body::from(body.to_string()))
+            .unwrap();
+
+        let register_response = app
+            .ready()
+            .await
+            .unwrap()
+            .call(register_request)
             .await
             .unwrap();
 
-            assert_eq!(response.status(), StatusCode::CONFLICT);
-    }*/
+        assert_eq!(register_response.status(), StatusCode::OK);
+
+        /* Log in and check token is valid */
+
+        let login_request = Request::post(login_uri)
+            .header(http::header::CONTENT_TYPE, "application/json")
+            .body(Body::from(body.to_string()))
+            .unwrap();
+        
+        let login_response = app
+            .ready()
+            .await
+            .unwrap()
+            .call(login_request)
+            .await
+            .unwrap();
+
+        assert_eq!(login_response.status(), StatusCode::OK);
+
+        let response_body = hyper::body::to_bytes(login_response.into_body()).await.unwrap();
+        let response_string = String::from_utf8(response_body.to_vec()).unwrap();
+        let valid_token = JWT::validate(&response_string);
+
+        assert!(valid_token.is_ok());
+        
+        let delete_request = Request::delete(delete_profile_uri)
+            .header(http::header::AUTHORIZATION, response_string)
+            .body(Body::empty())
+            .unwrap();
+
+        let delete_response = app
+            .ready()
+            .await
+            .unwrap()
+            .call(delete_request)
+            .await
+            .unwrap();
+
+        assert_eq!(delete_response.status(), StatusCode::OK);
+    }
 
     #[tokio::test]
     async fn register_redirects_if_already_authenticated() {
