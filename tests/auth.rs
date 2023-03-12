@@ -6,7 +6,9 @@ mod tests {
         Router,
     };
     use deux::{
-        api::auth::config::configure as auth, api::user::config::configure as user,
+        api::auth::config::configure as auth,
+        api::user::config::configure as user,
+        api::profile::config::configure as profile,
         crypto::jwt::JWT, db::mongo::Mongo,
     };
     use std::sync::Arc;
@@ -17,7 +19,10 @@ mod tests {
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
         let state = Arc::new(db);
-        let routes = Router::new().nest("/auth", auth()).nest("/user", user());
+        let routes = Router::new()
+            .nest("/auth", auth())
+            .nest("/user", user())
+            .nest("/profile", profile());
         let app: Router<()> = Router::new().nest("/api", routes).with_state(state);
         app
     }
