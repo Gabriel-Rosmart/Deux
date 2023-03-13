@@ -14,6 +14,8 @@ mod tests {
     use std::sync::Arc;
     use tower::{Service, ServiceExt};
 
+    const AUTH_HEADER: &'static str = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJfaWQiOnsiJG9pZCI6IjY0MDYzM2NkMTdlYTA0OWYzZTM3NGRlOSJ9LCJlbWFpbCI6ImV4YW1wbGVAZ21haWwuY29tIn0.z8Yeg_SI5l35f5anNUjAROVAaTP-coHAJ7UkpzwVsOA";
+
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
         let state = Arc::new(db);
@@ -162,12 +164,10 @@ mod tests {
             since an already authenticated user should be redirected
         */
 
-        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
-
         let response = app
             .oneshot(
                 Request::post(uri)
-                    .header(http::header::AUTHORIZATION, auth_header)
+                    .header(http::header::AUTHORIZATION, AUTH_HEADER)
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -292,12 +292,10 @@ mod tests {
             since an already authenticated user should be redirected
         */
 
-        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIn0.wSwj67wG9ZUYAVVBnma-SIeSK9wLGGuZNSlMzlQiTQ0";
-
         let response = app
             .oneshot(
                 Request::post(uri)
-                    .header(http::header::AUTHORIZATION, auth_header)
+                    .header(http::header::AUTHORIZATION, AUTH_HEADER)
                     .body(Body::empty())
                     .unwrap(),
             )

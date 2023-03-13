@@ -1,5 +1,5 @@
 use mongodb::{
-    bson::{doc, Document},
+    bson::{doc, Document, oid::ObjectId},
     error::Result as MongoResult,
     results::{DeleteResult, InsertOneResult, UpdateResult},
     Collection,
@@ -11,6 +11,7 @@ use crate::{crypto::hash::{Hash, Iterations}, extractors::profile::UpdateProfile
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
+    pub _id: ObjectId,
     pub email: String,
     pub password: String,
 }
@@ -73,7 +74,7 @@ impl User {
     pub async fn verify(
         collection: &Collection<Self>,
         (email, password): (&str, &str),
-    ) -> MongoResult<bool> {
+    ) -> MongoResult<(bool, Option<ObjectId>)> {
         /* Find giver user, if not found return after checking password */
 
         let user = collection
@@ -86,10 +87,12 @@ impl User {
             .await?;
 
         if user.is_none() {
-            return Ok(false);
+            return Ok((false, None));
         }
 
-        Ok(Hash::verify(password, &user.unwrap().password))
+        let user = user.unwrap();
+
+        Ok((Hash::verify(password, &user.password), Some(user._id)))
     }
 
     pub async fn exists(collection: &Collection<Document>, email: &str) -> MongoResult<bool> {

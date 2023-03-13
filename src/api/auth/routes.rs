@@ -28,13 +28,12 @@ pub async fn login(
 
     /* Verify user and password, return INTERNAL_SERVER_ERROR if db communication fails */
 
-    let exists = User::verify(&collection, (&payload.email, &payload.password)).await?;
+    let (exists, id) = User::verify(&collection, (&payload.email, &payload.password)).await?;
 
-    let claims = Claims::new(&payload.email);
-
-    let cl = JWT::generate(claims)?;
 
     if exists {
+        let claims = Claims::new(id.unwrap(), &payload.email);
+        let cl = JWT::generate(claims)?;
         Ok((StatusCode::OK, cl).into_response())
     } else {
         Ok(StatusCode::UNAUTHORIZED.into_response())

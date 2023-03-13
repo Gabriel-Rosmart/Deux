@@ -1,5 +1,6 @@
 use hmac::{Hmac, Mac};
 use jwt::{SignWithKey, VerifyWithKey};
+use mongodb::bson::oid::ObjectId;
 use sha2::Sha256;
 
 use serde::{Deserialize, Serialize};
@@ -8,12 +9,14 @@ use crate::errors::server::AppError;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Claims {
+    _id: ObjectId,
     email: String,
 }
 
 impl Claims {
-    pub fn new(email: &str) -> Self {
+    pub fn new(id: ObjectId, email: &str) -> Self {
         Self {
+            _id: id,
             email: email.to_string(),
         }
     }

@@ -13,6 +13,8 @@ mod tests {
     use std::sync::Arc;
     use tower::ServiceExt;
 
+    const AUTH_HEADER: &'static str = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJfaWQiOnsiJG9pZCI6IjY0MDYzM2NkMTdlYTA0OWYzZTM3NGRlOSJ9LCJlbWFpbCI6ImV4YW1wbGVAZ21haWwuY29tIn0.z8Yeg_SI5l35f5anNUjAROVAaTP-coHAJ7UkpzwVsOA";
+
     async fn app() -> Router {
         let db = Mongo::init().await.unwrap();
         let state = Arc::new(db);
@@ -29,8 +31,6 @@ mod tests {
         let app = app().await;
         let uri = "/api/profile/update";
 
-        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImV4YW1wbGVAZ21haWwuY29tIn0.mvztvf67TauQ_3PIlM8YYmP0vb3d6yFE1olXVRUtlx0";
-
         let body = json!(
             {
                 "password": "12345678"
@@ -41,7 +41,7 @@ mod tests {
             .oneshot(
                 Request::put(uri)
                     .header(http::header::CONTENT_TYPE, "application/json")
-                    .header(http::header::AUTHORIZATION, auth_header)
+                    .header(http::header::AUTHORIZATION, AUTH_HEADER)
                     .body(Body::from(body.to_string()))
                     .unwrap(),
             )
@@ -56,8 +56,6 @@ mod tests {
         let app = app().await;
         let uri = "/api/profile/update";
 
-        let auth_header = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImV4YW1wbGVAZ21haWwuY29tIn0.mvztvf67TauQ_3PIlM8YYmP0vb3d6yFE1olXVRUtlx0";
-
         /* This operation should fail since password must be at least 8 chars long */
 
         let body = json!(
@@ -70,7 +68,7 @@ mod tests {
             .oneshot(
                 Request::put(uri)
                     .header(http::header::CONTENT_TYPE, "application/json")
-                    .header(http::header::AUTHORIZATION, auth_header)
+                    .header(http::header::AUTHORIZATION, AUTH_HEADER)
                     .body(Body::from(body.to_string()))
                     .unwrap(),
             )
