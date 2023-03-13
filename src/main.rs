@@ -7,6 +7,8 @@ mod middleware;
 mod models;
 mod server;
 mod constants;
+mod cache;
+mod shared;
 
 use std::sync::Arc;
 
@@ -16,12 +18,16 @@ use api::user::config::configure as user;
 use axum::Router;
 use db::mongo::Mongo;
 use server::config::ServerConfig;
+use tokio::sync::Mutex;
+use shared::state::AppState;
 
 #[tokio::main]
 async fn main() {
     let db = Mongo::init().await.unwrap();
 
-    let state = Arc::new(db);
+    //let state = Arc::new(db);
+
+    let state = Arc::new(Mutex::new(AppState::new(db)));
 
     let routes = Router::new()
         .nest("/auth", auth())

@@ -5,7 +5,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use mongodb::{bson::Document, Database};
+use mongodb::bson::Document;
 
 use crate::crypto::jwt::{Claims, JWT};
 use crate::constants::messages::DatabaseMessages;
@@ -16,11 +16,16 @@ use validator::Validate;
 
 use crate::errors::server::AppError;
 
+use crate::shared::state::AppState;
+use tokio::sync::Mutex;
+
 pub async fn login(
-    State(db): State<Arc<Database>>,
+    State(state): State<Arc<Mutex<AppState>>>,
     Json(payload): Json<LoginRequest>,
 ) -> Result<Response, AppError> {
-    let collection = db.collection::<User>("users");
+    //let collection = state.db.collection::<User>("users");
+
+    let collection = state.lock().await.db.collection::<User>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
 
@@ -41,10 +46,12 @@ pub async fn login(
 }
 
 pub async fn register(
-    State(db): State<Arc<Database>>,
+    State(state): State<Arc<Mutex<AppState>>>,
     Json(payload): Json<RegisterRequest>,
 ) -> Result<Response, AppError> {
-    let collection = db.collection::<Document>("users");
+    //let collection = db.collection::<Document>("users");
+
+    let collection = state.lock().await.db.collection::<Document>("users");
 
     /* Validate given json, return BAD_REQUEST with error if unvalid */
 

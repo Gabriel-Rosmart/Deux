@@ -11,11 +11,13 @@ use axum::{
     },
     Router
 };
-use mongodb::Database;
+
+use tokio::sync::Mutex;
+use crate::shared::state::AppState;
 
 use crate::middleware::auth::Auth;
 
-pub fn configure() -> Router<Arc<Database>> {
+pub fn configure() -> Router<Arc<Mutex<AppState>>> {
     Router::new()
         .route("/delete", delete(delete_user))
         .route("/update", put(update))
