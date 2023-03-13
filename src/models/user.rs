@@ -18,6 +18,20 @@ pub struct User {
 }
 
 impl User {
+
+    pub async fn all(collection: &Collection<Self>) -> MongoResult<Vec<Self>> {
+        let mut cursor = collection.find(None, None).await?;
+
+        let mut result: Vec<User> = Vec::new();
+
+        while cursor.advance().await? {
+            result.push(cursor.deserialize_current()?);
+        }
+
+        Ok(result)
+    }
+
+
     pub async fn create(
         collection: &Collection<Document>,
         (email, password): (&str, &str),
