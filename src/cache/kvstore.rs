@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::models::user::User;
+
 /*
 pub struct KVStore<'a, T> {
     items: HashMap<&'a str, T>
@@ -16,7 +18,7 @@ impl<'a, T> KVStore<'a, T> {
 }*/
 
 pub struct KVStore {
-    items: HashMap<String, Vec<isize>>
+    items: HashMap<String, Vec<User>>
 }
 
 impl Default for KVStore {
@@ -24,5 +26,15 @@ impl Default for KVStore {
         Self {
             items: HashMap::new()
         }
+    }
+}
+
+impl KVStore {
+    pub fn insert(&mut self, key: String, value: Vec<User>) {
+        self.items.insert(key, value);
+    }
+
+    pub fn get(&self, key: &str) -> Option<Vec<User>> {
+        self.items.get(key).cloned()
     }
 }

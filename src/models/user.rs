@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{crypto::hash::{Hash, Iterations}, extractors::profile::UpdateProfileRequest};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct User {
     pub _id: ObjectId,
     pub email: String,
