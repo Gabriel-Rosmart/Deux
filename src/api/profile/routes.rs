@@ -19,7 +19,7 @@ pub async fn update(
 ) -> Result<Response, AppError> {
     payload.validate()?;
     let collection = db.collection::<Document>("users");
-    let result = User::update(&collection, &current_user.email(), &payload.password).await?;
+    let result = User::update(&collection, &current_user.email(), payload).await?;
     if result.modified_count == 0 {
         return Ok((StatusCode::NOT_FOUND, DatabaseMessages::NOT_EXISTS).into_response());
     }

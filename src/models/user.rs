@@ -7,7 +7,7 @@ use mongodb::{
 
 use serde::{Deserialize, Serialize};
 
-use crate::crypto::hash::{Hash, Iterations};
+use crate::{crypto::hash::{Hash, Iterations}, extractors::profile::UpdateProfileRequest};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
@@ -38,10 +38,10 @@ impl User {
     pub async fn update(
         collection: &Collection<Document>,
         email: &str,
-        password: &str,
+        fields: UpdateProfileRequest,
     ) -> MongoResult<UpdateResult> {
 
-        let hash = Hash::generate(password, Iterations::MEDIUM);
+        let hash = Hash::generate(&fields.password, Iterations::MEDIUM);
 
         let result = collection
             .update_one(doc! {
