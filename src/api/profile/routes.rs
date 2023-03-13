@@ -9,6 +9,7 @@ use axum::{
     Extension, Json,
 };
 use mongodb::{bson::Document, Database};
+use validator::Validate;
 use std::sync::Arc;
 
 pub async fn update(
@@ -16,6 +17,7 @@ pub async fn update(
     Extension(current_user): Extension<Claims>,
     Json(payload): Json<UpdateProfileRequest>
 ) -> Result<Response, AppError> {
+    payload.validate()?;
     let collection = db.collection::<Document>("users");
     let result = User::update(&collection, &current_user.email(), &payload.password).await?;
     if result.modified_count == 0 {
