@@ -24,7 +24,7 @@ pub fn extract_bearer(request: &Request<Body>) -> Result<String, &'static str> {
 
 fn validate_header(header: &str) -> bool {
     lazy_static! {
-        static ref RE: Regex = Regex::new(r"^Bearer [a-zA-z0-9]+").unwrap();
+        static ref RE: Regex = Regex::new(r"^(?i)Bearer [a-zA-z0-9]+").unwrap();
     }
     RE.is_match(header)
 }
