@@ -13,6 +13,7 @@ use crate::{crypto::hash::{Hash, Iterations}, extractors::profile::UpdateProfile
 pub struct User {
     pub _id: ObjectId,
     pub email: String,
+    #[serde(skip_serializing)]
     pub password: String,
 }
 
